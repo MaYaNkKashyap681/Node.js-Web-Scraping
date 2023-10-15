@@ -1,0 +1,32 @@
+/*General Method*/
+
+const puppeteer = require('puppeteer');
+
+const URL_TO_SCRAPE = 'https://www.scrapethissite.com/pages/simple/';
+
+async function main() {
+    console.log('Launching Chromium browser...');
+    const browser = await puppeteer.launch({ // Replace with the correct Chromium executable path
+        headless: false, // Open Chromium in non-headless mode
+    });
+    try {
+        const page = await browser.newPage();
+        console.log('Connected! Navigating to', URL_TO_SCRAPE);
+        await page.goto(URL_TO_SCRAPE);
+        // Wait for the page content to load
+        await page.waitForSelector('h3.country-name');
+        const countryNames = await page.$$eval('h3.country-name', elements =>
+            elements.map(element => element.textContent)
+        );
+        console.log('Scraped country names:');
+        countryNames.forEach(name => console.log(name));
+    } finally {
+        // Comment out or remove the following line if you want to keep the browser window open after scraping
+        // await browser.close();
+    }
+}
+
+main().catch(err => {
+    console.error(err.stack || err);
+    process.exit(1);
+});
